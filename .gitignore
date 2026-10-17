@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.*
+!.env.example
+# runtime data (database, uploads, backups) never goes in git
+data/
+*.db
+*.db-wal
+*.db-shm
+config.local.json
+# Tauri / Rust
+app/src-tauri/target/
+app/src-tauri/gen/
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+packaging/windows/part-hub-service.exe

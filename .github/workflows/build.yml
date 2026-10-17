@@ -1,0 +1,76 @@
+# Builds and tests on both targets. Tags like v0.2.0 produce release artifacts.
+name: build
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  bundle:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            bundles: appimage,deb
+          - os: windows-2022
+            bundles: nsis,msi
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+      - name: Linux build deps for Tauri
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: npm ci
+      - name: Desktop client (Tauri)
+        run: npm run tauri -w app -- build --bundles ${{ matrix.bundles }}
+      - name: WinSW service wrapper
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe -OutFile packaging/windows/part-hub-service.exe
+      - name: Server package
+        run: node scripts/package-server.mjs
+      - name: Archive server package
+        shell: bash
+        run: |
+          cd build
+          if [ "$RUNNER_OS" = "Windows" ]; then 7z a "${PWD}/../server-package.zip" part-hub-server-*; else tar -czf ../server-package.tar.gz part-hub-server-*; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: part-hub-${{ runner.os }}
+          path: |
+            app/src-tauri/target/release/bundle/**/*.exe
+            app/src-tauri/target/release/bundle/**/*.msi
+            app/src-tauri/target/release/bundle/**/*.AppImage
+            app/src-tauri/target/release/bundle/**/*.deb
+            server-package.*
+          if-no-files-found: error

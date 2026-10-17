@@ -1,0 +1,10 @@
+{
+  "port": 8787,
+  "host": "0.0.0.0",
+  "backupDir": "D:\\HubBackups",
+  "backupKeep": 30,
+  "sessionHours": 12,
+  "pollSeconds": 10,
+  "maxUploadMb": 512,
+  "corsOrigins": []
+}

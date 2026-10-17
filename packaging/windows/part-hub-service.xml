@@ -1,0 +1,21 @@
+<!-- WinSW v2 service definition. part-hub-service.exe (WinSW-x64.exe renamed) sits next to this file. -->
+<service>
+  <id>PartHub</id>
+  <name>Part Hub server</name>
+  <description>Shop hub API, database and printer connections.</description>
+  <executable>%BASE%\..\..\node\node.exe</executable>
+  <arguments>"%BASE%\..\..\server\dist\index.js"</arguments>
+  <workingdirectory>%BASE%\..\..\server</workingdirectory>
+  <env name="HUB_DATA_DIR" value="%ProgramData%\PartHub" />
+  <env name="HUB_LOG_STDOUT" value="1" />
+  <logpath>%ProgramData%\PartHub\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+  <startmode>Automatic</startmode>
+  <delayedAutoStart>true</delayedAutoStart>
+  <onfailure action="restart" delay="10 sec" />
+  <onfailure action="restart" delay="30 sec" />
+  <resetfailure>1 hour</resetfailure>
+</service>

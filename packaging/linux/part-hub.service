@@ -1,0 +1,27 @@
+# systemd unit for the Hub server. Installed by packaging/linux/install.sh.
+[Unit]
+Description=Part Hub server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=parthub
+Group=parthub
+Environment=HUB_DATA_DIR=/var/lib/part-hub
+Environment=HUB_LOG_STDOUT=1
+WorkingDirectory=/opt/part-hub/current/server
+ExecStart=/opt/part-hub/current/node/node /opt/part-hub/current/server/dist/index.js
+Restart=on-failure
+RestartSec=5
+# Hardening: the service can write only its data folder and the backup folder.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/part-hub
+# Add your backup mount here, e.g.:
+# ReadWritePaths=/mnt/backup/part-hub
+
+[Install]
+WantedBy=multi-user.target

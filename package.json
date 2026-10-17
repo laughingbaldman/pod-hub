@@ -1,0 +1,16 @@
+{
+  "name": "part-hub",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shop hub: parts, batches, G-code library and printer fleet. Runs offline on a LAN (Windows 10 and Linux).",
+  "workspaces": ["server", "app"],
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:app": "npm run dev -w app",
+    "build": "npm run build -w server && npm run build -w app",
+    "test": "npm test -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w app",
+    "start": "npm start -w server"
+  }
+}
